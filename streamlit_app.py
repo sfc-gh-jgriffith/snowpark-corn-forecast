@@ -24,10 +24,9 @@ if not 'n_periods_forecast' in st.session_state:
     st.session_state['n_periods_forecast'] = 90
 
 @st.cache(allow_output_mutation=True)
-def get_data(n_periods_past, n_periods_forecast):
+def get_data(n_periods_forecast):
     actuals = session.table("CORN_PRICE_DAILY").to_pandas()
     forecast = (session.table_function('forecast', lit(n_periods_forecast))
-                    .filter(col('DATE') > F.dateadd('day', -lit(n_periods_past), F.current_date()) )
                     .to_pandas()
                 )
     
@@ -47,7 +46,7 @@ def get_data(n_periods_past, n_periods_forecast):
 
     return forecast
 
-df = get_data(st.session_state['n_periods_past'], st.session_state['n_periods_forecast'])
+df = get_data(st.session_state['n_periods_forecast'])
 
 
 
@@ -56,29 +55,31 @@ st.header("Corn Price History and Forecast")
 
 current_date_data = df.loc[df['DATE'] == df.loc[~pd.isnull(df['ACTUAL']), 'DATE'].max()] .reset_index()
 
-def retrain_model(periods=None):
-    session.call('train_prophet', periods)
-
-
-with st.sidebar:
-    with st.form(key='form'):
-        
-        
-        st.markdown(
-        f"""
-            ***Current Price:*** {current_date_data['ACTUAL'][0] :.2f}  
-            ***Upper Prediction Limit:*** {current_date_data['YHAT_UPPER'][0] :.2f}  
-            ***Lower Prediction Limit:*** {current_date_data['YHAT_LOWER'][0] :.2f}  
-            ***Current Recommendation:*** {current_date_data['RECOMMENDATION'][0]}
-
-            Prescriptive rules: If current price is greater than the upper prediction limit, sell is recommended. If current price is less than the upper prediction limit, buy is recommended. 
-        """
-        )
-        n_periods_past = st.slider(label="Number of Past Days", min_value=1, max_value=365*30, key='n_periods_past')
-        st.slider(label="Number of Forecast Days", min_value=1, max_value=365, key='n_periods_forecast')
-        submit_button = st.form_submit_button("Retrain Model", on_click=retrain_model(n_periods_past)   )
+# TODO: Figure out how to refresh predictions dataset when model is retrained. 
+@st.cache
+def retrain_model(n_periods):
+    sproc_result = session.call('train_prophet', n_periods)
+    # increment to override cache to get new dataset
+    # st.session_state['n_periods_forecast'] = st.session_state['n_periods_forecast'] + 1
+    # predictions = get_data(st.session_state['n_periods_forecast'])
+    return sproc_result
     
+with st.sidebar:
+    st.markdown(
+    f"""
+        ***Current Price:*** {current_date_data['ACTUAL'][0] :.2f}  
+        ***Upper Prediction Limit:*** {current_date_data['YHAT_UPPER'][0] :.2f}  
+        ***Lower Prediction Limit:*** {current_date_data['YHAT_LOWER'][0] :.2f}  
+        ***Current Recommendation:*** {current_date_data['RECOMMENDATION'][0]}
 
+        Prescriptive rules: If current price is greater than the upper prediction limit, sell is recommended. If current price is less than the upper prediction limit, buy is recommended. 
+    """
+    )
+    
+    st.slider(label="Number of Forecast Days (Make Predictions)", min_value=1, max_value=365, key='n_periods_forecast')
+    st.slider(label="Number of Past Days  (Retrain Model)", min_value=1, max_value=365*30, key='n_periods_past')
+    if st.button('Retrain Model'):
+        retrain_model(st.session_state['n_periods_past'])
 
 def fillcol(label):
     st.text(label)
