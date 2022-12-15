@@ -48,17 +48,17 @@ group by
 
 3. Use notebook to train and deploy the model
     3.1. Create `creds.json` file with your Snowflake account and credentials in the following format:
-```
-{
-   "account": "YOURSNOWFLAKE-ACCOUNT",
-   "user": "YOUR_USER",
-   "role": "YOUR_ROLE",
-   "password": "YOUR_PW",
-   "database": "Commodities_Data_Atlas",
-   "schema": "commodities",
-   "warehouse": "YOUR_WH"
-}
-```
+    ```
+    {
+       "account": "YOURSNOWFLAKE-ACCOUNT",
+       "user": "YOUR_USER",
+       "role": "YOUR_ROLE",
+       "password": "YOUR_PW",
+       "database": "Commodities_Data_Atlas",
+       "schema": "commodities",
+       "warehouse": "YOUR_WH"
+    }
+    ```
 
 
     3.2. Walk through notebook. Run all cells to deploy `train_prophet` stored procedure, which deploys `predict` UDTF.
