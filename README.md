@@ -16,7 +16,6 @@ Uses US Milk Futures data from Knoema's [Commodoties Data Atlas](https://www.sno
 ![Confirm Terms](images/confirm_terms.png)
 
 2. Create view for milk futures prices:
-
 ```
 create or replace database commodities_forecasting;
 use database commodities_forecasting;
@@ -48,9 +47,7 @@ group by
 
 
 3. Use notebook to train and deploy the model
-
     3.1. Create `creds.json` file with your Snowflake account and credentials in the following format:
-
 ```
 {
    "account": "YOURSNOWFLAKE-ACCOUNT",
