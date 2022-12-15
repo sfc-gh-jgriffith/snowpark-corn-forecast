@@ -13,7 +13,6 @@ Uses US Milk Futures data from Knoema's [Commodoties Data Atlas](https://www.sno
     ![Listing](images/commodities_data_atlas_description.png)
 
     1.3. Accept terms, grant any additional roles access, and press OK.
-
 ![Confirm Terms](images/confirm_terms.png)
 
 2. Create view for milk futures prices:
