@@ -1,4 +1,4 @@
-# Snowpark ML Demo
+# Snowpark ML Milk Futures Forecasting
 
 Uses US Milk Futures data from Knoema's [Commodoties Data Atlas](https://www.snowflake.com/datasets/knoema-commodities-data-atlas/) marketplace listing. We train a FB Prophet forecasting model using Snowpark Python Stored Procs (SPROCs) and deploy it using a User-Defined Table Functions (UDFs). A Streamlit app allows end users to re-run the model and explore the outputs. 
 
