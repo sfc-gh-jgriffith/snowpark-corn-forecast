@@ -18,6 +18,8 @@ def init_connection():
 
 session = init_connection()
 
+price_table_name = 'milk_price_daily'
+
 if not 'n_periods_past' in st.session_state:
     st.session_state['n_periods_past'] = 1050
 if not 'n_periods_forecast' in st.session_state:
@@ -25,12 +27,12 @@ if not 'n_periods_forecast' in st.session_state:
 
 @st.cache(allow_output_mutation=True)
 def get_data(n_periods_forecast):
-    actuals = session.table("CORN_PRICE_DAILY").to_pandas()
+    actuals = session.table(price_table_name).to_pandas()
     forecast = (session.table_function('forecast', lit(n_periods_forecast))
                     .to_pandas()
                 )
     
-    actuals = session.table('corn_price_daily').select(col('DATE'),col('VALUE')).to_pandas() 
+    actuals = session.table(price_table_name).select(col('DATE'),col('CLOSE')).to_pandas() 
     actuals.columns = ['DATE', 'ACTUAL']
 
     forecast = forecast.set_index('DATE').join(actuals.set_index('DATE'), how='left').reset_index()
@@ -50,7 +52,7 @@ df = get_data(st.session_state['n_periods_forecast'])
 
 
 
-st.header("Corn Price History and Forecast")
+st.header("Milk Futures History and Forecast")
 
 
 current_date_data = df.loc[df['DATE'] == df.loc[~pd.isnull(df['ACTUAL']), 'DATE'].max()] .reset_index()
@@ -130,8 +132,8 @@ fig = go.Figure([
 
 fig.update_layout(
     xaxis_title='Date',
-    yaxis_title='Value',
-    title='Corn Prices by Date',
+    yaxis_title='Close Price',
+    title='Milk Futures by Date',
     hovermode='x'
 )
 
@@ -202,5 +204,4 @@ fig.update_layout(legend=dict(
 
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-#st.dataframe(df.loc[df['DATE'] <= datetime.datetime.now().date()].sort_values('DATE', ascending=False) )
 st.dataframe(df.sort_values('DATE', ascending=False) )
